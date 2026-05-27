@@ -18,6 +18,7 @@ from app.agents.prompts import (
     WEAK_TOPIC_PROMPT,
 )
 from app.core.config import get_settings
+from app.core.exam_knowledge import format_curated_exam_knowledge
 
 
 class GovPrepAgentRunners:
@@ -112,9 +113,13 @@ class GovPrepAgentRunners:
             exam_type,
             "latest official syllabus topic weightage",
         )
+        curated_knowledge = format_curated_exam_knowledge(exam_type)
         prompt = f"""
 Exam: {exam_type}
 Instruction: {instruction}
+
+Curated knowledge:
+{curated_knowledge}
 
 Search evidence:
 {search_result}
@@ -136,9 +141,13 @@ Return a clear syllabus map with:
             exam_type,
             "previous year question paper pattern PYQ analysis",
         )
+        curated_knowledge = format_curated_exam_knowledge(exam_type)
         prompt = f"""
 Exam: {exam_type}
 Instruction: {instruction}
+
+Curated knowledge:
+{curated_knowledge}
 
 Search evidence:
 {search_result}
@@ -167,16 +176,20 @@ Search evidence:
 {search_result}
 
 Filter for high-probability exam relevance only. Include concise explanations and probable sections.
-Include source URLs and avoid claiming a topic is confirmed for the exam unless evidence supports it.
+Include source URLs. Do not claim a topic is confirmed for the exam unless evidence supports it.
 """
         return await self.call_agent(CURRENT_AFFAIRS_PROMPT, prompt)
 
     async def run_mock_test_agent(self, instruction: str, exam_type: str) -> str:
         """Generate a 20-question exam-style mock test."""
 
+        curated_knowledge = format_curated_exam_knowledge(exam_type)
         prompt = f"""
 Exam: {exam_type}
 Instruction: {instruction}
+
+Curated knowledge:
+{curated_knowledge}
 
 Create a 20-question mock test spanning all major subjects. For each question include:
 - question
@@ -190,22 +203,30 @@ Create a 20-question mock test spanning all major subjects. For each question in
     async def run_weak_topic_agent(self, instruction: str, exam_type: str) -> str:
         """Identify weak topics and generate targeted revision material."""
 
+        curated_knowledge = format_curated_exam_knowledge(exam_type)
         prompt = f"""
 Exam: {exam_type}
 Instruction and prior context:
 {instruction}
 
-Identify low-coverage or weak topics, then create focused revision notes, common traps, and mnemonics.
+Curated knowledge:
+{curated_knowledge}
+
+Identify low-coverage or weak topics. Create focused revision notes, common traps, and mnemonics.
 """
         return await self.call_agent(WEAK_TOPIC_PROMPT, prompt)
 
     async def run_study_plan_agent(self, instruction: str, exam_type: str) -> str:
         """Create a day-wise timetable with revision and mock-test cycles."""
 
+        curated_knowledge = format_curated_exam_knowledge(exam_type)
         prompt = f"""
 Exam: {exam_type}
 Instruction and planning context:
 {instruction}
+
+Curated knowledge:
+{curated_knowledge}
 
 Create a realistic timetable. Include daily hours, subject rotation, revision cycles, PYQ practice,
 mock-test schedule, and 10-month, 8-month, and 6-month roadmap options when relevant.
