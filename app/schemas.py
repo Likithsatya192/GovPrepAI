@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-ExamType = Literal["SSC", "Banking", "GATE", "RRB"]
+ExamType = Literal["SSC", "Banking", "GATE CS/IT", "GATE DA", "RRB"]
 
 
 class GovPrepRequest(BaseModel):

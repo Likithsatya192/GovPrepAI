@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Literal, NotRequired, TypedDict
 
 
-ExamType = Literal["SSC", "Banking", "GATE", "RRB"]
+ExamType = Literal["SSC", "Banking", "GATE CS/IT", "GATE DA", "RRB"]
 StepStatus = Literal["pending", "done", "failed"]
 
 

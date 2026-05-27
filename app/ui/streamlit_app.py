@@ -7,7 +7,7 @@ import streamlit as st
 
 
 API_BASE_URL = "http://localhost:8000"
-EXAMS = ["SSC", "Banking", "GATE", "RRB"]
+EXAMS = ["SSC", "Banking", "GATE CS/IT", "GATE DA", "RRB"]
 
 
 st.set_page_config(page_title="GovPrepAI", page_icon="GP", layout="wide")

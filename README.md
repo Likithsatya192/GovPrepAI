@@ -6,7 +6,8 @@ Supported exam tracks:
 
 - SSC
 - Banking
-- GATE
+- GATE CS/IT
+- GATE DA
 - RRB
 
 ## Features
@@ -286,7 +287,7 @@ Request body:
 
 ```json
 {
-  "exam_type": "GATE",
+  "exam_type": "GATE CS/IT",
   "topic": "Operating Systems"
 }
 ```
