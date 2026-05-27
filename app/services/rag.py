@@ -8,18 +8,36 @@ import warnings
 from io import BytesIO
 from typing import TYPE_CHECKING
 
+from chromadb.config import Settings as ChromaClientSettings
+from chromadb.telemetry.product import ProductTelemetryClient, ProductTelemetryEvent
 import fitz
-from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
+from langchain_core._api.deprecation import LangChainDeprecationWarning
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from overrides import override
 
 from app.core.config import get_settings
 
 if TYPE_CHECKING:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_core.embeddings import Embeddings
+
+try:
+    from langchain_chroma import Chroma
+except ImportError:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=LangChainDeprecationWarning)
+        from langchain_community.vectorstores import Chroma
 
 
 logger = logging.getLogger(__name__)
+
+
+class NoOpChromaTelemetry(ProductTelemetryClient):
+    """Chroma telemetry client that intentionally drops local telemetry events."""
+
+    @override
+    def capture(self, event: ProductTelemetryEvent) -> None:
+        return None
 
 
 class NotesRagService:
@@ -36,7 +54,16 @@ class NotesRagService:
         name = f"notes_{safe_user_id}"[:63].strip("_-")
         return name if len(name) >= 3 else "notes_default"
 
-    def embeddings(self) -> HuggingFaceEmbeddings:
+    def chroma_client_settings(self) -> ChromaClientSettings:
+        """Disable Chroma anonymized telemetry for cleaner local logs."""
+
+        return ChromaClientSettings(
+            anonymized_telemetry=False,
+            chroma_product_telemetry_impl="app.services.rag.NoOpChromaTelemetry",
+            chroma_telemetry_impl="app.services.rag.NoOpChromaTelemetry",
+        )
+
+    def embeddings(self) -> Embeddings:
         settings = get_settings()
         with warnings.catch_warnings():
             warnings.filterwarnings(
@@ -45,7 +72,11 @@ class NotesRagService:
                 category=UserWarning,
                 module=r"pydantic\._internal\._fields",
             )
-            from langchain_community.embeddings import HuggingFaceEmbeddings
+            warnings.filterwarnings("ignore", category=LangChainDeprecationWarning)
+            try:
+                from langchain_huggingface import HuggingFaceEmbeddings
+            except ImportError:
+                from langchain_community.embeddings import HuggingFaceEmbeddings
 
             return HuggingFaceEmbeddings(model_name=settings.embedding_model)
 
@@ -76,6 +107,7 @@ class NotesRagService:
             collection_name=collection,
             embedding_function=self.embeddings(),
             persist_directory=settings.chroma_persist_dir,
+            client_settings=self.chroma_client_settings(),
         )
         try:
             vectorstore.delete_collection()
@@ -90,8 +122,10 @@ class NotesRagService:
             embedding=self.embeddings(),
             collection_name=collection,
             persist_directory=settings.chroma_persist_dir,
+            client_settings=self.chroma_client_settings(),
         )
-        vectorstore.persist()
+        if hasattr(vectorstore, "persist"):
+            vectorstore.persist()
         return len(chunks)
 
     def retrieve_notes_context(self, query: str, user_id: str, k: int = 6) -> str:
@@ -102,6 +136,7 @@ class NotesRagService:
             collection_name=self.collection_name(user_id),
             embedding_function=self.embeddings(),
             persist_directory=settings.chroma_persist_dir,
+            client_settings=self.chroma_client_settings(),
         )
         try:
             documents = vectorstore.similarity_search(query, k=k)

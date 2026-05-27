@@ -21,6 +21,9 @@ from app.core.config import get_settings
 from app.core.exam_knowledge import format_curated_exam_knowledge
 
 
+DDGS._impersonates = ("chrome_131",)
+
+
 class GovPrepAgentRunners:
     """Runs all specialized preparation agents with async LLM calls."""
 
@@ -230,6 +233,8 @@ Curated knowledge:
 
 Create a realistic timetable. Include daily hours, subject rotation, revision cycles, PYQ practice,
 mock-test schedule, and 10-month, 8-month, and 6-month roadmap options when relevant.
+For a 6-month plan, include month-wise phases, weekly topic allocation, revision slots,
+resource URLs from curated knowledge, topic weightage priorities, and mock-analysis routine.
 """
         return await self.call_agent(STUDY_PLAN_PROMPT, prompt)
 
