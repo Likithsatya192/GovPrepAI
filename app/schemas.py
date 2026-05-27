@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-ExamType = Literal["UPSC", "SSC", "GATE", "Banking", "State PSC", "Railway"]
+ExamType = Literal["SSC", "Banking", "GATE", "RRB"]
 
 
 class GovPrepRequest(BaseModel):
@@ -44,4 +44,3 @@ class UploadNotesResponse(BaseModel):
 
     user_id: str
     chunk_count: int
-

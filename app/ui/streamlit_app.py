@@ -7,7 +7,7 @@ import streamlit as st
 
 
 API_BASE_URL = "http://localhost:8000"
-EXAMS = ["UPSC", "SSC", "GATE", "Banking", "State PSC", "Railway"]
+EXAMS = ["SSC", "Banking", "GATE", "RRB"]
 
 
 st.set_page_config(page_title="GovPrepAI", page_icon="GP", layout="wide")
@@ -94,4 +94,3 @@ with tabs[4]:
             )
         response.raise_for_status()
         st.success(f"Indexed {response.json()['chunk_count']} chunks.")
-

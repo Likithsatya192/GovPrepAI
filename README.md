@@ -4,12 +4,10 @@ GovPrepAI is a multi-agent exam preparation assistant for government and competi
 
 Supported exam tracks:
 
-- UPSC
 - SSC
-- GATE
 - Banking
-- State PSC
-- Railway
+- GATE
+- RRB
 
 ## Features
 
@@ -280,7 +278,7 @@ Request body:
 
 ```json
 {
-  "exam_type": "UPSC"
+  "exam_type": "RRB"
 }
 ```
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Literal, NotRequired, TypedDict
 
 
-ExamType = Literal["UPSC", "SSC", "GATE", "Banking", "State PSC", "Railway"]
+ExamType = Literal["SSC", "Banking", "GATE", "RRB"]
 StepStatus = Literal["pending", "done", "failed"]
 
 
@@ -32,4 +32,3 @@ class GovPrepState(TypedDict):
     replan_count: int
     error: str | None
     notes_context: NotRequired[str]
-
