@@ -14,6 +14,8 @@ Supported exam tracks:
 ## Features
 
 - Multi-agent plan-and-execute workflow powered by LangGraph.
+- Source-grounded responses with URL-based search evidence.
+- India-region search defaults for exam preparation queries.
 - Syllabus navigator for exam topics, subtopics, priority, and weightage.
 - Question bank agent for previous-year-style practice questions.
 - Current affairs agent for exam-relevant recent topics.
@@ -144,6 +146,8 @@ Optional:
 | `CHROMA_PERSIST_DIR` | `./chroma_db` | Local ChromaDB persistence directory. |
 | `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | HuggingFace embedding model. |
 | `LLM_TEMPERATURE` | `0.2` | LLM temperature. |
+| `SEARCH_REGION` | `in-en` | DuckDuckGo region used for web evidence. |
+| `SEARCH_MAX_RESULTS` | `5` | Search results requested per query. |
 | `APP_RELOAD` | unset | Set to `true` only when running `python app/main.py` with autoreload. |
 
 Example `.env`:
@@ -155,6 +159,8 @@ APP_ENV=development
 CHROMA_PERSIST_DIR=./chroma_db
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 LLM_TEMPERATURE=0.2
+SEARCH_REGION=in-en
+SEARCH_MAX_RESULTS=5
 ```
 
 Do not commit `.env`. It is ignored by `.gitignore`.
@@ -325,6 +331,32 @@ Open:
 ```text
 http://localhost:8000/docs
 ```
+
+## Accuracy and Production Notes
+
+This project is designed to reduce hallucinations by grounding answers in search evidence and uploaded notes. It still cannot guarantee perfect answers, especially for live exam notifications, cutoffs, eligibility rules, dates, or official changes. For production use, always display source links and encourage users to verify final decisions from the official exam body.
+
+For better answer quality:
+
+- Keep `LLM_TEMPERATURE` low, such as `0.1` to `0.3`.
+- Prefer official PDFs, notifications, and exam-body pages in uploaded notes.
+- Ask users for their exact exam, year, category, language, and target date.
+- Use source URLs in final answers.
+- Mark uncertain or inferred content clearly.
+- Add monitoring for failed searches, empty results, slow LLM calls, and repeated user questions.
+
+### Search Provider
+
+The default search implementation uses `duckduckgo-search` because it is free and works for prototyping. It is not the same as ChatGPT's built-in web search and it does not provide paid production guarantees. For a startup-scale product, consider adding a provider abstraction and using a dedicated search API such as Brave Search API, Tavily, Google Programmable Search, or OpenAI's Responses API web search when budget allows.
+
+### Free Deployment Reality
+
+Free hosting and free LLM/search tiers are useful for demos, early testing, and small pilots. They are not enough for "all users in India" because free tiers usually have limits on requests, bandwidth, uptime, CPU/RAM, storage, abuse protection, and support. A realistic path is:
+
+1. Launch a free pilot for a small user group.
+2. Collect high-value exam questions and improve prompts/RAG.
+3. Add analytics, rate limits, caching, and source verification.
+4. Move to paid infrastructure only after usage proves demand.
 
 ## Development Checks
 

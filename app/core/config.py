@@ -19,6 +19,8 @@ class Settings:
     chroma_persist_dir: str
     embedding_model: str
     llm_temperature: float
+    search_region: str
+    search_max_results: int
 
 
 @lru_cache
@@ -36,4 +38,6 @@ def get_settings() -> Settings:
             "sentence-transformers/all-MiniLM-L6-v2",
         ),
         llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0.2")),
+        search_region=os.getenv("SEARCH_REGION", "in-en"),
+        search_max_results=int(os.getenv("SEARCH_MAX_RESULTS", "5")),
     )
