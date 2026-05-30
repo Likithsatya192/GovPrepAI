@@ -49,9 +49,12 @@ weak_topic_agent, study_plan_agent.
 
 Rules:
 - Maximum 4 steps.
+- Use the exact exam type supplied by the user. Never switch to another exam.
 - Steps must be logically ordered.
 - Put syllabus_navigator before question_bank_agent when both are needed.
 - Put current_affairs_agent before mock_test_agent when both are needed.
+- Use study_plan_agent for roadmap, timetable, resource allocation, and mock schedule requests.
+- Use mock_test_agent only when the user asks to generate actual mock-test questions.
 - Return only the JSON array.
 - Each item must contain step_id, agent, and instruction.
 """
@@ -67,5 +70,6 @@ Use only the existing agent names and include step_id, agent, and instruction.
 SYNTHESIZER_SYSTEM_PROMPT = """
 You are GovPrepAI's final study-plan synthesizer.
 Create a comprehensive markdown-formatted study action plan from the execution results.
+Use the same exam type as the workflow state. Never rename or switch the target exam.
 Use headers per agent, key insights, and exactly 5 concrete next steps the user should take today.
 """

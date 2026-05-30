@@ -11,6 +11,7 @@ from app.agents.runners import (
     run_study_plan_agent,
     run_syllabus_navigator,
 )
+from app.core.exam_types import resolve_exam_type
 from app.schemas import (
     ExamTypeRequest,
     GovPrepRequest,
@@ -65,6 +66,7 @@ class GovPrepApi:
         return UploadNotesResponse(user_id=user_id, chunk_count=chunk_count)
 
     async def prepare(self, request: GovPrepRequest) -> dict:
+        exam_type, exam_type_overridden = resolve_exam_type(request.exam_type, request.goal)
         notes_context = await asyncio.to_thread(
             self.rag_service.retrieve_notes_context,
             request.goal,
@@ -77,10 +79,14 @@ class GovPrepApi:
 
         result = await self.pipeline.run(
             goal=goal,
-            exam_type=request.exam_type,
+            exam_type=exam_type,
             user_id=request.user_id,
         )
-        return dict(result)
+        response = dict(result)
+        response["requested_exam_type"] = request.exam_type
+        response["resolved_exam_type"] = exam_type
+        response["exam_type_overridden"] = exam_type_overridden
+        return response
 
     async def syllabus(self, request: ExamTypeRequest) -> dict[str, str]:
         result = await run_syllabus_navigator(
@@ -101,5 +107,8 @@ class GovPrepApi:
             f"Weak topics: {weak_topics}. Include 10-month, 8-month, and 6-month options."
         )
         result = await run_study_plan_agent(instruction, request.exam_type)
-        return {"exam_type": request.exam_type, "target_date": request.target_date, "result": result}
-
+        return {
+            "exam_type": request.exam_type,
+            "target_date": request.target_date,
+            "result": result,
+        }
